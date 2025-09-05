@@ -47,6 +47,83 @@ export const LeftSidebar = ({ activeSection, onSectionChange, config, onConfigCh
         })}
       </div>
 
+      {/* Configuration Panel for Structure */}
+      {activeSection === 'structure' && (
+        <Card className="absolute left-16 top-0 w-80 h-full bg-white border-r border-gray-200 z-10">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium">Structure</h3>
+              <Button variant="ghost" size="sm" onClick={() => onSectionChange(null)}>
+                ×
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Color setup</label>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Base plate</span>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-6 h-6 rounded border"
+                        style={{ backgroundColor: config.structure.colors.basePlate }}
+                      ></div>
+                      <span className="text-xs text-gray-500">RAL 7035</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Color of primary structure</span>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-6 h-6 rounded border"
+                        style={{ backgroundColor: config.structure.colors.primaryStructure }}
+                      ></div>
+                      <span className="text-xs text-gray-500">RAL 5012</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Color of secondary structure</span>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-6 h-6 rounded border"
+                        style={{ backgroundColor: config.structure.colors.secondaryStructure }}
+                      ></div>
+                      <span className="text-xs text-gray-500">RAL 5007</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Other frames color</span>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-6 h-6 rounded border"
+                        style={{ backgroundColor: config.structure.colors.otherFrames }}
+                      ></div>
+                      <span className="text-xs text-gray-500">RAL 5012</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600">Color of bracing</span>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-6 h-6 rounded border"
+                        style={{ backgroundColor: config.structure.colors.bracing }}
+                      ></div>
+                      <span className="text-xs text-gray-500">RAL 3003</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Configuration Panel for Building */}
       {activeSection === 'building' && (
         <Card className="absolute left-16 top-0 w-80 h-full bg-white border-r border-gray-200 z-10">
