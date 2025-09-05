@@ -28,9 +28,13 @@ export const mockHangarConfig = {
     type: 'corrugated'
   },
   roof: {
-    type: 'pitched', // 'flat' or 'pitched'
+    type: 'duo-pitch', // 'flat', 'duo-pitch', 'mono-pitch'
+    pitch: 15, // degrees
     material: 'metal',
-    color: '#4a5568'
+    color: '#4a5568',
+    overhang: 0.5, // meters
+    gutterType: 'box',
+    ridgeHeight: 2.5 // additional height at ridge
   },
   openings: {
     door: {
