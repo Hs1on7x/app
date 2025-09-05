@@ -138,19 +138,28 @@ export const LeftSidebar = ({ activeSection, onSectionChange, config, onConfigCh
               
               {config.roof.type !== 'flat' && (
                 <div>
-                  <label className="text-xs text-gray-600 mb-1 block">Roof Pitch: {config.roof.pitch}°</label>
+                  <label className="text-xs text-gray-600 mb-1 block">Slope: {config.roof.slope} x/12</label>
                   <input 
                     type="range"
-                    min="5"
-                    max="45"
-                    step="1"
-                    value={config.roof.pitch}
+                    min="0"
+                    max="12"
+                    step="0.25"
+                    value={config.roof.slope}
                     className="w-full"
-                    onChange={(e) => onConfigChange({
-                      ...config,
-                      roof: { ...config.roof, pitch: parseInt(e.target.value) }
-                    })}
+                    onChange={(e) => {
+                      const slope = parseFloat(e.target.value);
+                      const pitch = Math.atan(slope / 12) * (180 / Math.PI); // Convert to degrees
+                      onConfigChange({
+                        ...config,
+                        roof: { 
+                          ...config.roof, 
+                          slope: slope,
+                          pitch: pitch
+                        }
+                      });
+                    }}
                   />
+                  <span className="text-xs text-gray-500">0-12 x/12</span>
                 </div>
               )}
             </div>
