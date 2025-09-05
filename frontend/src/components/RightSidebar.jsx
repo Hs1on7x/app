@@ -204,6 +204,7 @@ export const RightSidebar = ({ config, onConfigChange }) => {
             </div>
           </div>
         </Card>
+        {/* Panel Configuration */}
         <Card className="m-4 p-4 bg-gray-700 border-gray-600">
           <h4 className="font-medium text-sm mb-4">Panels</h4>
           
