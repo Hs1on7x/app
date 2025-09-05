@@ -82,16 +82,82 @@ export const HangarModel = ({ config }) => {
       group.add(backPanel);
     }
 
-    // Roof structure
-    if (config.roof.type === 'pitched') {
-      const roofGeometry = new THREE.ConeGeometry(width * 0.7, 2, 4);
-      const roofMaterial = new THREE.MeshLambertMaterial({ color: '#4a5568' });
+    // Roof structure - Duo Pitch
+    if (config.roof.type === 'duo-pitch') {
+      const roofPitchRad = (config.roof.pitch * Math.PI) / 180;
+      const ridgeHeight = config.roof.ridgeHeight || 2.5;
+      const overhang = config.roof.overhang || 0.5;
+      
+      // Create duo pitch roof geometry
+      const roofGeometry = new THREE.BufferGeometry();
+      const roofVertices = [];
+      const roofIndices = [];
+      
+      // Roof dimensions with overhang
+      const roofWidth = width + (overhang * 2);
+      const roofDepth = depth + (overhang * 2);
+      
+      // Define roof vertices (duo pitch creates a ridge down the center)
+      // Ridge line runs along the width direction
+      const ridgeY = height + baseHeight + ridgeHeight;
+      const eaveY = height + baseHeight;
+      
+      // Front slope vertices
+      roofVertices.push(
+        // Ridge line
+        -roofWidth / 2, ridgeY, -roofDepth / 2,  // 0
+        roofWidth / 2, ridgeY, -roofDepth / 2,   // 1
+        
+        // Front eave
+        -roofWidth / 2, eaveY, -roofDepth / 2 - Math.tan(roofPitchRad) * ridgeHeight,  // 2
+        roofWidth / 2, eaveY, -roofDepth / 2 - Math.tan(roofPitchRad) * ridgeHeight   // 3
+      );
+      
+      // Back slope vertices  
+      roofVertices.push(
+        // Ridge line (same as front)
+        -roofWidth / 2, ridgeY, roofDepth / 2,   // 4
+        roofWidth / 2, ridgeY, roofDepth / 2,    // 5
+        
+        // Back eave
+        -roofWidth / 2, eaveY, roofDepth / 2 + Math.tan(roofPitchRad) * ridgeHeight,   // 6
+        roofWidth / 2, eaveY, roofDepth / 2 + Math.tan(roofPitchRad) * ridgeHeight     // 7
+      );
+      
+      // Define triangles for both roof slopes
+      roofIndices.push(
+        // Front slope
+        0, 2, 1,  1, 2, 3,
+        // Back slope  
+        4, 5, 6,  5, 7, 6,
+        // Left gable end
+        0, 4, 2,  4, 6, 2,
+        // Right gable end
+        1, 3, 5,  3, 7, 5
+      );
+      
+      roofGeometry.setIndex(roofIndices);
+      roofGeometry.setAttribute('position', new THREE.Float32BufferAttribute(roofVertices, 3));
+      roofGeometry.computeVertexNormals();
+      
+      const roofMaterial = new THREE.MeshLambertMaterial({ 
+        color: config.roof.color,
+        side: THREE.DoubleSide 
+      });
       const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-      roof.position.y = height + baseHeight + 1;
-      roof.rotation.y = Math.PI / 4;
       roof.castShadow = true;
+      roof.receiveShadow = true;
       group.add(roof);
-    } else {
+      
+      // Add ridge cap
+      const ridgeGeometry = new THREE.BoxGeometry(roofWidth, 0.1, 0.2);
+      const ridgeMaterial = new THREE.MeshLambertMaterial({ color: '#2d3748' });
+      const ridge = new THREE.Mesh(ridgeGeometry, ridgeMaterial);
+      ridge.position.y = ridgeY + 0.05;
+      ridge.castShadow = true;
+      group.add(ridge);
+      
+    } else if (config.roof.type === 'flat') {
       // Flat roof
       const roofGeometry = new THREE.BoxGeometry(width, 0.2, depth);
       const roofMaterial = new THREE.MeshLambertMaterial({ color: '#4a5568' });
