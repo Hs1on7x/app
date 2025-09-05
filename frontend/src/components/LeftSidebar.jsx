@@ -91,24 +91,49 @@ export const LeftSidebar = ({ activeSection, onSectionChange, config, onConfigCh
                     type="number" 
                     className="w-full p-2 border border-gray-300 rounded text-sm"
                     value={config.dimensions.width}
+                    min="3"
+                    max="100"
+                    step="0.1"
                     onChange={(e) => onConfigChange({
                       ...config,
                       dimensions: { ...config.dimensions, width: parseFloat(e.target.value) }
                     })}
                   />
+                  <span className="text-xs text-gray-500">3-100m</span>
                 </div>
                 <div>
-                  <label className="text-xs text-gray-600">Depth (m)</label>
+                  <label className="text-xs text-gray-600">Length (m)</label>
                   <input 
                     type="number" 
                     className="w-full p-2 border border-gray-300 rounded text-sm"
                     value={config.dimensions.depth}
+                    min="6"
+                    max="200"
+                    step="0.1"
                     onChange={(e) => onConfigChange({
                       ...config,
                       dimensions: { ...config.dimensions, depth: parseFloat(e.target.value) }
                     })}
                   />
+                  <span className="text-xs text-gray-500">6-200m</span>
                 </div>
+              </div>
+              
+              <div>
+                <label className="text-xs text-gray-600">Building eave height (m)</label>
+                <input 
+                  type="number" 
+                  className="w-full p-2 border border-gray-300 rounded text-sm"
+                  value={config.dimensions.height}
+                  min="3"
+                  max="15"
+                  step="0.1"
+                  onChange={(e) => onConfigChange({
+                    ...config,
+                    dimensions: { ...config.dimensions, height: parseFloat(e.target.value) }
+                  })}
+                />
+                <span className="text-xs text-gray-500">3-15m</span>
               </div>
               
               {config.roof.type !== 'flat' && (
