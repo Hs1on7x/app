@@ -47,7 +47,93 @@ export const LeftSidebar = ({ activeSection, onSectionChange, config, onConfigCh
         })}
       </div>
 
-      {/* Configuration Panel */}
+      {/* Configuration Panel for Building */}
+      {activeSection === 'building' && (
+        <Card className="absolute left-16 top-0 w-80 h-full bg-white border-r border-gray-200 z-10">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium">Building Configuration</h3>
+              <Button variant="ghost" size="sm" onClick={() => onSectionChange(null)}>
+                ×
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Building Type</label>
+                <select className="w-full p-2 border border-gray-300 rounded text-sm">
+                  <option>Standard Hangar</option>
+                  <option>Clear Span Hangar</option>
+                  <option>Multi-Bay Hangar</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Roof System</label>
+                <select 
+                  className="w-full p-2 border border-gray-300 rounded text-sm"
+                  value={config.roof.type}
+                  onChange={(e) => onConfigChange({
+                    ...config,
+                    roof: { ...config.roof, type: e.target.value }
+                  })}
+                >
+                  <option value="duo-pitch">Duo Pitch</option>
+                  <option value="mono-pitch">Mono Pitch</option>
+                  <option value="flat">Flat Roof</option>
+                </select>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-600">Width (m)</label>
+                  <input 
+                    type="number" 
+                    className="w-full p-2 border border-gray-300 rounded text-sm"
+                    value={config.dimensions.width}
+                    onChange={(e) => onConfigChange({
+                      ...config,
+                      dimensions: { ...config.dimensions, width: parseFloat(e.target.value) }
+                    })}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600">Depth (m)</label>
+                  <input 
+                    type="number" 
+                    className="w-full p-2 border border-gray-300 rounded text-sm"
+                    value={config.dimensions.depth}
+                    onChange={(e) => onConfigChange({
+                      ...config,
+                      dimensions: { ...config.dimensions, depth: parseFloat(e.target.value) }
+                    })}
+                  />
+                </div>
+              </div>
+              
+              {config.roof.type !== 'flat' && (
+                <div>
+                  <label className="text-xs text-gray-600 mb-1 block">Roof Pitch: {config.roof.pitch}°</label>
+                  <input 
+                    type="range"
+                    min="5"
+                    max="45"
+                    step="1"
+                    value={config.roof.pitch}
+                    className="w-full"
+                    onChange={(e) => onConfigChange({
+                      ...config,
+                      roof: { ...config.roof, pitch: parseInt(e.target.value) }
+                    })}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Configuration Panel for Quote */}
       {activeSection === 'quote' && (
         <Card className="absolute left-16 top-0 w-80 h-full bg-white border-r border-gray-200 z-10">
           <div className="p-4">
