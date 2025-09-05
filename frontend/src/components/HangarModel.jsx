@@ -7,79 +7,107 @@ export const HangarModel = ({ config }) => {
     const group = new THREE.Group();
     
     // Hangar dimensions from config
-    const width = config.dimensions.width || 18.49;
-    const depth = config.dimensions.depth || 12;
-    const height = config.dimensions.height || 6;
+    const width = config.dimensions.width || 52.00;
+    const depth = config.dimensions.depth || 36.00;
+    const height = config.dimensions.height || 5.50; // eave height
     const baseHeight = 0.5;
 
-    // Base/Foundation
-    const baseGeometry = new THREE.BoxGeometry(width + 1, baseHeight, depth + 1);
-    const baseMaterial = new THREE.MeshLambertMaterial({ color: '#e2e8f0' });
-    const baseMesh = new THREE.Mesh(baseGeometry, baseMaterial);
-    baseMesh.position.y = baseHeight / 2;
-    baseMesh.receiveShadow = true;
-    group.add(baseMesh);
+    // Base/Foundation (only if enabled)
+    if (config.visualization.basePlate) {
+      const baseGeometry = new THREE.BoxGeometry(width + 1, baseHeight, depth + 1);
+      const baseMaterial = new THREE.MeshLambertMaterial({ color: '#e2e8f0' });
+      const baseMesh = new THREE.Mesh(baseGeometry, baseMaterial);
+      baseMesh.position.y = baseHeight / 2;
+      baseMesh.receiveShadow = true;
+      group.add(baseMesh);
+    }
 
-    // Main structure walls
-    const wallThickness = 0.1;
-    
-    // Front and back walls
-    const frontWallGeometry = new THREE.BoxGeometry(width, height, wallThickness);
-    const wallMaterial = new THREE.MeshLambertMaterial({ 
-      color: '#cbd5e0',
-      transparent: true,
-      opacity: 0.9
-    });
-    
-    const frontWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
-    frontWall.position.set(0, height / 2 + baseHeight, depth / 2);
-    frontWall.castShadow = true;
-    group.add(frontWall);
-
-    const backWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
-    backWall.position.set(0, height / 2 + baseHeight, -depth / 2);
-    backWall.castShadow = true;
-    group.add(backWall);
-
-    // Side walls
-    const sideWallGeometry = new THREE.BoxGeometry(wallThickness, height, depth);
-    const leftWall = new THREE.Mesh(sideWallGeometry, wallMaterial);
-    leftWall.position.set(-width / 2, height / 2 + baseHeight, 0);
-    leftWall.castShadow = true;
-    group.add(leftWall);
-
-    const rightWall = new THREE.Mesh(sideWallGeometry, wallMaterial);
-    rightWall.position.set(width / 2, height / 2 + baseHeight, 0);
-    rightWall.castShadow = true;
-    group.add(rightWall);
-
-    // Corrugated siding panels
-    for (let i = 0; i < config.panels.count; i++) {
-      const panelWidth = width / config.panels.count;
-      const panelGeometry = new THREE.PlaneGeometry(panelWidth - 0.05, height);
-      const panelMaterial = new THREE.MeshLambertMaterial({ 
-        color: config.panels.color,
-        side: THREE.DoubleSide
-      });
+    // Main structure walls (only if solidWalls enabled)
+    if (config.visualization.solidWalls) {
+      const wallThickness = 0.2;
       
-      // Front panels
-      const frontPanel = new THREE.Mesh(panelGeometry, panelMaterial);
-      frontPanel.position.set(
-        (i - config.panels.count / 2 + 0.5) * panelWidth,
-        height / 2 + baseHeight,
-        depth / 2 + 0.01
-      );
-      group.add(frontPanel);
+      // Wall material with edges or faces
+      let wallMaterial;
+      if (config.visualization.faces) {
+        wallMaterial = new THREE.MeshLambertMaterial({ 
+          color: '#cbd5e0',
+          transparent: true,
+          opacity: 0.9
+        });
+      } else {
+        wallMaterial = new THREE.MeshBasicMaterial({ 
+          color: '#cbd5e0',
+          wireframe: config.visualization.edges,
+          transparent: true,
+          opacity: 0.7
+        });
+      }
+      
+      // Front and back walls
+      const frontWallGeometry = new THREE.BoxGeometry(width, height, wallThickness);
+      
+      const frontWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
+      frontWall.position.set(0, height / 2 + baseHeight, depth / 2);
+      frontWall.castShadow = true;
+      group.add(frontWall);
 
-      // Back panels
-      const backPanel = new THREE.Mesh(panelGeometry, panelMaterial);
-      backPanel.position.set(
-        (i - config.panels.count / 2 + 0.5) * panelWidth,
-        height / 2 + baseHeight,
-        -depth / 2 - 0.01
-      );
-      backPanel.rotation.y = Math.PI;
-      group.add(backPanel);
+      const backWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
+      backWall.position.set(0, height / 2 + baseHeight, -depth / 2);
+      backWall.castShadow = true;
+      group.add(backWall);
+
+      // Side walls
+      const sideWallGeometry = new THREE.BoxGeometry(wallThickness, height, depth);
+      const leftWall = new THREE.Mesh(sideWallGeometry, wallMaterial);
+      leftWall.position.set(-width / 2, height / 2 + baseHeight, 0);
+      leftWall.castShadow = true;
+      group.add(leftWall);
+
+      const rightWall = new THREE.Mesh(sideWallGeometry, wallMaterial);
+      rightWall.position.set(width / 2, height / 2 + baseHeight, 0);
+      rightWall.castShadow = true;
+      group.add(rightWall);
+    }
+
+    // Corrugated siding panels (only if panels enabled)
+    if (config.visualization.panels) {
+      for (let i = 0; i < config.panels.count; i++) {
+        const panelWidth = width / config.panels.count;
+        const panelGeometry = new THREE.PlaneGeometry(panelWidth - 0.05, height);
+        
+        let panelMaterial;
+        if (config.visualization.faces) {
+          panelMaterial = new THREE.MeshLambertMaterial({ 
+            color: config.panels.color,
+            side: THREE.DoubleSide
+          });
+        } else {
+          panelMaterial = new THREE.MeshBasicMaterial({ 
+            color: config.panels.color,
+            wireframe: config.visualization.edges,
+            side: THREE.DoubleSide
+          });
+        }
+        
+        // Front panels
+        const frontPanel = new THREE.Mesh(panelGeometry, panelMaterial);
+        frontPanel.position.set(
+          (i - config.panels.count / 2 + 0.5) * panelWidth,
+          height / 2 + baseHeight,
+          depth / 2 + 0.01
+        );
+        group.add(frontPanel);
+
+        // Back panels
+        const backPanel = new THREE.Mesh(panelGeometry, panelMaterial);
+        backPanel.position.set(
+          (i - config.panels.count / 2 + 0.5) * panelWidth,
+          height / 2 + baseHeight,
+          -depth / 2 - 0.01
+        );
+        backPanel.rotation.y = Math.PI;
+        group.add(backPanel);
+      }
     }
 
     // Roof structure - Duo Pitch
