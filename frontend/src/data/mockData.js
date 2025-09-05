@@ -1,8 +1,8 @@
 export const mockHangarConfig = {
   dimensions: {
-    width: 18.49,
-    depth: 12,
-    height: 6
+    width: 52.00,
+    depth: 36.00,
+    height: 5.50 // eave height
   },
   visualization: {
     edges: true,
@@ -23,13 +23,14 @@ export const mockHangarConfig = {
     decorations: false
   },
   panels: {
-    count: 16,
+    count: 20,
     color: '#cbd5e0',
     type: 'corrugated'
   },
   roof: {
     type: 'duo-pitch', // 'flat', 'duo-pitch', 'mono-pitch'
-    pitch: 15, // degrees
+    pitch: 15, // degrees (converted from 1.00 x/12)
+    slope: 1.00, // x/12 format
     material: 'metal',
     color: '#4a5568',
     overhang: 0.5, // meters
