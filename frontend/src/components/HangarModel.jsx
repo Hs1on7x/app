@@ -2,6 +2,10 @@ import React, { useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
+import React, { useMemo } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+
 export const HangarModel = ({ config }) => {
   const hangarGeometry = useMemo(() => {
     const group = new THREE.Group();
@@ -10,103 +14,209 @@ export const HangarModel = ({ config }) => {
     const width = config.dimensions.width || 52.00;
     const depth = config.dimensions.depth || 36.00;
     const height = config.dimensions.height || 5.50; // eave height
-    const baseHeight = 0.5;
+    const baseHeight = 0.3;
+    const frameSpacing = config.structure.frameSpacing || 6;
+    const ridgeHeight = config.roof.ridgeHeight || 2.5;
 
-    // Base/Foundation (only if enabled)
+    // Helper function for material creation based on visualization settings
+    const createMaterial = (color, isStructural = false) => {
+      if (!config.visualization.faces && config.visualization.edges) {
+        return new THREE.MeshBasicMaterial({ 
+          color: color,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.8
+        });
+      } else if (config.visualization.faces) {
+        return new THREE.MeshLambertMaterial({ 
+          color: color,
+          transparent: isStructural ? false : true,
+          opacity: isStructural ? 1.0 : 0.9
+        });
+      } else {
+        return new THREE.MeshBasicMaterial({ 
+          color: color,
+          transparent: true,
+          opacity: 0.3
+        });
+      }
+    };
+
+    // Base plates and foundation (only if basePlate enabled)
     if (config.visualization.basePlate) {
-      const baseGeometry = new THREE.BoxGeometry(width + 1, baseHeight, depth + 1);
-      const baseMaterial = new THREE.MeshLambertMaterial({ color: '#e2e8f0' });
+      const baseGeometry = new THREE.BoxGeometry(width + 2, baseHeight, depth + 2);
+      const baseMaterial = createMaterial(config.structure.colors.basePlate);
       const baseMesh = new THREE.Mesh(baseGeometry, baseMaterial);
       baseMesh.position.y = baseHeight / 2;
       baseMesh.receiveShadow = true;
       group.add(baseMesh);
-    }
 
-    // Main structure walls (only if solidWalls enabled)
-    if (config.visualization.solidWalls) {
-      const wallThickness = 0.2;
-      
-      // Wall material with edges or faces
-      let wallMaterial;
-      if (config.visualization.faces) {
-        wallMaterial = new THREE.MeshLambertMaterial({ 
-          color: '#cbd5e0',
-          transparent: true,
-          opacity: 0.9
-        });
-      } else {
-        wallMaterial = new THREE.MeshBasicMaterial({ 
-          color: '#cbd5e0',
-          wireframe: config.visualization.edges,
-          transparent: true,
-          opacity: 0.7
-        });
-      }
-      
-      // Front and back walls
-      const frontWallGeometry = new THREE.BoxGeometry(width, height, wallThickness);
-      
-      const frontWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
-      frontWall.position.set(0, height / 2 + baseHeight, depth / 2);
-      frontWall.castShadow = true;
-      group.add(frontWall);
-
-      const backWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
-      backWall.position.set(0, height / 2 + baseHeight, -depth / 2);
-      backWall.castShadow = true;
-      group.add(backWall);
-
-      // Side walls
-      const sideWallGeometry = new THREE.BoxGeometry(wallThickness, height, depth);
-      const leftWall = new THREE.Mesh(sideWallGeometry, wallMaterial);
-      leftWall.position.set(-width / 2, height / 2 + baseHeight, 0);
-      leftWall.castShadow = true;
-      group.add(leftWall);
-
-      const rightWall = new THREE.Mesh(sideWallGeometry, wallMaterial);
-      rightWall.position.set(width / 2, height / 2 + baseHeight, 0);
-      rightWall.castShadow = true;
-      group.add(rightWall);
-    }
-
-    // Corrugated siding panels (only if panels enabled)
-    if (config.visualization.panels) {
-      for (let i = 0; i < config.panels.count; i++) {
-        const panelWidth = width / config.panels.count;
-        const panelGeometry = new THREE.PlaneGeometry(panelWidth - 0.05, height);
+      // Individual base plates under columns
+      const frameCount = Math.floor(depth / frameSpacing) + 1;
+      for (let i = 0; i < frameCount; i++) {
+        const frameZ = -depth / 2 + (i * frameSpacing);
         
-        let panelMaterial;
-        if (config.visualization.faces) {
-          panelMaterial = new THREE.MeshLambertMaterial({ 
-            color: config.panels.color,
-            side: THREE.DoubleSide
-          });
-        } else {
-          panelMaterial = new THREE.MeshBasicMaterial({ 
-            color: config.panels.color,
-            wireframe: config.visualization.edges,
-            side: THREE.DoubleSide
-          });
+        // Left base plate
+        const leftBasePlate = new THREE.Mesh(
+          new THREE.BoxGeometry(1, baseHeight * 0.8, 1),
+          createMaterial(config.structure.colors.basePlate, true)
+        );
+        leftBasePlate.position.set(-width / 2, baseHeight * 0.4, frameZ);
+        group.add(leftBasePlate);
+        
+        // Right base plate
+        const rightBasePlate = new THREE.Mesh(
+          new THREE.BoxGeometry(1, baseHeight * 0.8, 1),
+          createMaterial(config.structure.colors.basePlate, true)
+        );
+        rightBasePlate.position.set(width / 2, baseHeight * 0.4, frameZ);
+        group.add(rightBasePlate);
+      }
+    }
+
+    // Triangular Steel Frames (Primary Structure) - only if frames enabled
+    if (config.visualization.frames) {
+      const frameCount = Math.floor(depth / frameSpacing) + 1;
+      const primaryMaterial = createMaterial(config.structure.colors.primaryStructure, true);
+      
+      for (let i = 0; i < frameCount; i++) {
+        const frameZ = -depth / 2 + (i * frameSpacing);
+        
+        // Left column
+        const leftColumnGeometry = new THREE.BoxGeometry(0.4, height, 0.4);
+        const leftColumn = new THREE.Mesh(leftColumnGeometry, primaryMaterial);
+        leftColumn.position.set(-width / 2, height / 2 + baseHeight, frameZ);
+        leftColumn.castShadow = true;
+        group.add(leftColumn);
+        
+        // Right column
+        const rightColumn = new THREE.Mesh(leftColumnGeometry, primaryMaterial);
+        rightColumn.position.set(width / 2, height / 2 + baseHeight, frameZ);
+        rightColumn.castShadow = true;
+        group.add(rightColumn);
+        
+        // Triangular roof frame (Duo Pitch)
+        if (config.roof.type === 'duo-pitch') {
+          // Left rafter
+          const rafterLength = Math.sqrt((width / 2) ** 2 + ridgeHeight ** 2);
+          const rafterAngle = Math.atan(ridgeHeight / (width / 2));
+          
+          const leftRafterGeometry = new THREE.BoxGeometry(rafterLength, 0.4, 0.4);
+          const leftRafter = new THREE.Mesh(leftRafterGeometry, primaryMaterial);
+          leftRafter.position.set(-width / 4, height + baseHeight + ridgeHeight / 2, frameZ);
+          leftRafter.rotation.z = -rafterAngle;
+          group.add(leftRafter);
+          
+          // Right rafter
+          const rightRafter = new THREE.Mesh(leftRafterGeometry, primaryMaterial);
+          rightRafter.position.set(width / 4, height + baseHeight + ridgeHeight / 2, frameZ);
+          rightRafter.rotation.z = rafterAngle;
+          group.add(rightRafter);
+          
+          // Ridge beam
+          const ridgeGeometry = new THREE.BoxGeometry(0.4, 0.4, 0.4);
+          const ridge = new THREE.Mesh(ridgeGeometry, primaryMaterial);
+          ridge.position.set(0, height + baseHeight + ridgeHeight, frameZ);
+          group.add(ridge);
         }
         
-        // Front panels
-        const frontPanel = new THREE.Mesh(panelGeometry, panelMaterial);
-        frontPanel.position.set(
-          (i - config.panels.count / 2 + 0.5) * panelWidth,
-          height / 2 + baseHeight,
-          depth / 2 + 0.01
-        );
-        group.add(frontPanel);
+        // Horizontal tie beam
+        const tieBeamGeometry = new THREE.BoxGeometry(width, 0.4, 0.4);
+        const tieBeam = new THREE.Mesh(tieBeamGeometry, primaryMaterial);
+        tieBeam.position.set(0, height + baseHeight - 0.2, frameZ);
+        group.add(tieBeam);
+      }
+    }
 
-        // Back panels
-        const backPanel = new THREE.Mesh(panelGeometry, panelMaterial);
-        backPanel.position.set(
-          (i - config.panels.count / 2 + 0.5) * panelWidth,
-          height / 2 + baseHeight,
-          -depth / 2 - 0.01
+    // X-Bracing between frames (only if bracing enabled)
+    if (config.visualization.bracing) {
+      const bracingMaterial = createMaterial(config.structure.colors.bracing, true);
+      const frameCount = Math.floor(depth / frameSpacing) + 1;
+      
+      for (let i = 0; i < frameCount - 1; i++) {
+        const frameZ1 = -depth / 2 + (i * frameSpacing);
+        const frameZ2 = -depth / 2 + ((i + 1) * frameSpacing);
+        const bracingZ = (frameZ1 + frameZ2) / 2;
+        
+        // Left side X-bracing
+        const leftBracingLength = Math.sqrt(frameSpacing ** 2 + height ** 2);
+        const leftBracingAngle = Math.atan(height / frameSpacing);
+        
+        // Left diagonal 1 (bottom to top)
+        const leftBrace1 = new THREE.Mesh(
+          new THREE.BoxGeometry(leftBracingLength, 0.15, 0.15),
+          bracingMaterial
         );
-        backPanel.rotation.y = Math.PI;
-        group.add(backPanel);
+        leftBrace1.position.set(-width / 2, height / 2 + baseHeight, bracingZ);
+        leftBrace1.rotation.x = leftBracingAngle;
+        group.add(leftBrace1);
+        
+        // Left diagonal 2 (top to bottom)
+        const leftBrace2 = new THREE.Mesh(
+          new THREE.BoxGeometry(leftBracingLength, 0.15, 0.15),
+          bracingMaterial
+        );
+        leftBrace2.position.set(-width / 2, height / 2 + baseHeight, bracingZ);
+        leftBrace2.rotation.x = -leftBracingAngle;
+        group.add(leftBrace2);
+        
+        // Right side X-bracing
+        const rightBrace1 = new THREE.Mesh(
+          new THREE.BoxGeometry(leftBracingLength, 0.15, 0.15),
+          bracingMaterial
+        );
+        rightBrace1.position.set(width / 2, height / 2 + baseHeight, bracingZ);
+        rightBrace1.rotation.x = leftBracingAngle;
+        group.add(rightBrace1);
+        
+        const rightBrace2 = new THREE.Mesh(
+          new THREE.BoxGeometry(leftBracingLength, 0.15, 0.15),
+          bracingMaterial
+        );
+        rightBrace2.position.set(width / 2, height / 2 + baseHeight, bracingZ);
+        rightBrace2.rotation.x = -leftBracingAngle;
+        group.add(rightBrace2);
+      }
+    }
+
+    // Girts (Horizontal wall supports) - only if girts enabled  
+    if (config.visualization.girts) {
+      const girtMaterial = createMaterial(config.structure.colors.secondaryStructure, true);
+      const girtCount = 3; // Number of horizontal levels
+      
+      for (let level = 1; level <= girtCount; level++) {
+        const girtY = baseHeight + (level * height / (girtCount + 1));
+        
+        // Front girts
+        const frontGirtGeometry = new THREE.BoxGeometry(width, 0.2, 0.2);
+        const frontGirt = new THREE.Mesh(frontGirtGeometry, girtMaterial);
+        frontGirt.position.set(0, girtY, depth / 2);
+        group.add(frontGirt);
+        
+        // Back girts
+        const backGirt = new THREE.Mesh(frontGirtGeometry, girtMaterial);
+        backGirt.position.set(0, girtY, -depth / 2);
+        group.add(backGirt);
+      }
+    }
+
+    // Purlins (Horizontal roof supports) - only if purlins enabled
+    if (config.visualization.purlins && config.roof.type === 'duo-pitch') {
+      const purlinMaterial = createMaterial(config.structure.colors.secondaryStructure, true);
+      const purlinCount = Math.floor(width / 4); // Every 4 meters
+      
+      for (let i = 0; i <= purlinCount; i++) {
+        const purlinX = -width / 2 + (i * (width / purlinCount));
+        
+        // Calculate purlin Y position based on roof slope
+        const distanceFromCenter = Math.abs(purlinX);
+        const slopeRatio = ridgeHeight / (width / 2);
+        const purlinY = height + baseHeight + ridgeHeight - (distanceFromCenter * slopeRatio);
+        
+        const purlinGeometry = new THREE.BoxGeometry(0.2, 0.2, depth);
+        const purlin = new THREE.Mesh(purlinGeometry, purlinMaterial);
+        purlin.position.set(purlinX, purlinY, 0);
+        group.add(purlin);
       }
     }
 
