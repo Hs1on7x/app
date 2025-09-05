@@ -230,6 +230,7 @@ export const HangarModel = ({ config }) => {
         group.add(beam);
       }
     }
+    // Add door if configured
     if (config.openings.door.enabled) {
       const doorGeometry = new THREE.PlaneGeometry(
         config.openings.door.width,
