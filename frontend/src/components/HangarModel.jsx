@@ -1,10 +1,6 @@
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
 
-import React, { useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
-
 export const HangarModel = ({ config }) => {
   const hangarGeometry = useMemo(() => {
     const group = new THREE.Group();
