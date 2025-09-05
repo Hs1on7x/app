@@ -205,8 +205,8 @@ export const HangarModel = ({ config }) => {
       group.add(roof);
     }
 
-    // Gable ends for duo-pitch roof
-    if (config.roof.type === 'duo-pitch') {
+    // Gable ends for duo-pitch roof (only if panels enabled)
+    if (config.visualization.panels && config.roof.type === 'duo-pitch') {
       const roofPitchRad = (config.roof.pitch * Math.PI) / 180;
       const ridgeHeight = config.roof.ridgeHeight || 2.5;
       
@@ -223,10 +223,19 @@ export const HangarModel = ({ config }) => {
       frontGableGeometry.setIndex([0, 1, 2]);
       frontGableGeometry.computeVertexNormals();
       
-      const gableMaterial = new THREE.MeshLambertMaterial({ 
-        color: config.panels.color,
-        side: THREE.DoubleSide 
-      });
+      let gableMaterial;
+      if (config.visualization.faces) {
+        gableMaterial = new THREE.MeshLambertMaterial({ 
+          color: config.panels.color,
+          side: THREE.DoubleSide 
+        });
+      } else {
+        gableMaterial = new THREE.MeshBasicMaterial({ 
+          color: config.panels.color,
+          wireframe: config.visualization.edges,
+          side: THREE.DoubleSide 
+        });
+      }
       
       const frontGable = new THREE.Mesh(frontGableGeometry, gableMaterial);
       frontGable.position.z = depth / 2;
@@ -239,7 +248,7 @@ export const HangarModel = ({ config }) => {
       group.add(backGable);
     }
 
-    // Structural frames (if enabled)
+    // Structural frames (only if frames enabled)
     if (config.visualization.frames) {
       const frameSpacing = config.structure.frameSpacing || 6;
       const frameCount = Math.floor(depth / frameSpacing) + 1;
@@ -248,8 +257,16 @@ export const HangarModel = ({ config }) => {
         const frameZ = -depth / 2 + (i * frameSpacing);
         
         // Vertical columns
-        const columnGeometry = new THREE.BoxGeometry(0.2, height, 0.2);
-        const frameMaterial = new THREE.MeshLambertMaterial({ color: '#2d3748' });
+        const columnGeometry = new THREE.BoxGeometry(0.3, height, 0.3);
+        let frameMaterial;
+        if (config.visualization.faces) {
+          frameMaterial = new THREE.MeshLambertMaterial({ color: '#2d3748' });
+        } else {
+          frameMaterial = new THREE.MeshBasicMaterial({ 
+            color: '#2d3748',
+            wireframe: config.visualization.edges
+          });
+        }
         
         // Left column
         const leftColumn = new THREE.Mesh(columnGeometry, frameMaterial);
@@ -262,10 +279,43 @@ export const HangarModel = ({ config }) => {
         group.add(rightColumn);
         
         // Horizontal beam
-        const beamGeometry = new THREE.BoxGeometry(width, 0.3, 0.2);
+        const beamGeometry = new THREE.BoxGeometry(width, 0.4, 0.3);
         const beam = new THREE.Mesh(beamGeometry, frameMaterial);
         beam.position.set(0, height + baseHeight, frameZ);
         group.add(beam);
+      }
+    }
+
+    // Purlins (horizontal roof supports) - only if purlins enabled
+    if (config.visualization.purlins && config.roof.type === 'duo-pitch') {
+      const purlinCount = Math.floor(width / 3); // Every 3 meters
+      for (let i = 0; i <= purlinCount; i++) {
+        const purlinX = -width / 2 + (i * (width / purlinCount));
+        const purlinGeometry = new THREE.BoxGeometry(0.2, 0.2, depth);
+        const purlinMaterial = new THREE.MeshLambertMaterial({ color: '#4a5568' });
+        const purlin = new THREE.Mesh(purlinGeometry, purlinMaterial);
+        purlin.position.set(purlinX, height + baseHeight + 1, 0);
+        group.add(purlin);
+      }
+    }
+
+    // Girts (horizontal wall supports) - only if girts enabled  
+    if (config.visualization.girts) {
+      const girtHeight = height / 3;
+      for (let i = 1; i < 3; i++) {
+        const girtY = baseHeight + (i * girtHeight);
+        
+        // Front and back girts
+        const girtGeometry = new THREE.BoxGeometry(width, 0.2, 0.2);
+        const girtMaterial = new THREE.MeshLambertMaterial({ color: '#4a5568' });
+        
+        const frontGirt = new THREE.Mesh(girtGeometry, girtMaterial);
+        frontGirt.position.set(0, girtY, depth / 2);
+        group.add(frontGirt);
+        
+        const backGirt = new THREE.Mesh(girtGeometry, girtMaterial);
+        backGirt.position.set(0, girtY, -depth / 2);
+        group.add(backGirt);
       }
     }
     // Add door if configured
