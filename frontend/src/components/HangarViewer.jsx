@@ -30,13 +30,11 @@ export const HangarViewer = ({ config, onConfigChange }) => {
           
           <HangarModel config={config} />
           
-          {/* Ground grid */}
-          <Grid 
-            args={[50, 50]} 
-            position={[0, -0.01, 0]}
-            cellColor="#4a5568"
-            sectionColor="#2d3748"
-          />
+          {/* Ground/Floor - solid color instead of grid */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
+            <planeGeometry args={[200, 200]} />
+            <meshLambertMaterial color="#99af55" />
+          </mesh>
           
           <Environment preset="dawn" />
           <OrbitControls 
