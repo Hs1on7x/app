@@ -318,8 +318,8 @@ export const HangarModel = ({ config }) => {
         group.add(backGirt);
       }
     }
-    // Add door if configured
-    if (config.openings.door.enabled) {
+    // Add door if configured (only if openings enabled)
+    if (config.visualization.openings && config.openings.door.enabled) {
       const doorGeometry = new THREE.PlaneGeometry(
         config.openings.door.width,
         config.openings.door.height
@@ -336,6 +336,30 @@ export const HangarModel = ({ config }) => {
         depth / 2 + 0.02
       );
       group.add(door);
+    }
+
+    // Add dimensions display (only if dimensions enabled)
+    if (config.visualization.dimensions) {
+      // Add dimension lines and text - simplified for now
+      const dimensionMaterial = new THREE.LineBasicMaterial({ color: '#ff0000' });
+      
+      // Width dimension line
+      const widthPoints = [
+        new THREE.Vector3(-width / 2, -0.5, depth / 2 + 2),
+        new THREE.Vector3(width / 2, -0.5, depth / 2 + 2)
+      ];
+      const widthGeometry = new THREE.BufferGeometry().setFromPoints(widthPoints);
+      const widthLine = new THREE.Line(widthGeometry, dimensionMaterial);
+      group.add(widthLine);
+      
+      // Depth dimension line
+      const depthPoints = [
+        new THREE.Vector3(-width / 2 - 2, -0.5, -depth / 2),
+        new THREE.Vector3(-width / 2 - 2, -0.5, depth / 2)
+      ];
+      const depthGeometry = new THREE.BufferGeometry().setFromPoints(depthPoints);
+      const depthLine = new THREE.Line(depthGeometry, dimensionMaterial);
+      group.add(depthLine);
     }
 
     return group;
