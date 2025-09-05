@@ -167,7 +167,69 @@ export const HangarModel = ({ config }) => {
       group.add(roof);
     }
 
-    // Add door if configured
+    // Gable ends for duo-pitch roof
+    if (config.roof.type === 'duo-pitch') {
+      const roofPitchRad = (config.roof.pitch * Math.PI) / 180;
+      const ridgeHeight = config.roof.ridgeHeight || 2.5;
+      
+      // Front gable end
+      const frontGableGeometry = new THREE.BufferGeometry();
+      const gableVertices = [
+        // Triangle for gable end
+        -width / 2, height + baseHeight, 0,  // bottom left
+        width / 2, height + baseHeight, 0,   // bottom right  
+        0, height + baseHeight + ridgeHeight, 0  // top peak
+      ];
+      
+      frontGableGeometry.setAttribute('position', new THREE.Float32BufferAttribute(gableVertices, 3));
+      frontGableGeometry.setIndex([0, 1, 2]);
+      frontGableGeometry.computeVertexNormals();
+      
+      const gableMaterial = new THREE.MeshLambertMaterial({ 
+        color: config.panels.color,
+        side: THREE.DoubleSide 
+      });
+      
+      const frontGable = new THREE.Mesh(frontGableGeometry, gableMaterial);
+      frontGable.position.z = depth / 2;
+      group.add(frontGable);
+      
+      // Back gable end
+      const backGable = new THREE.Mesh(frontGableGeometry, gableMaterial);
+      backGable.position.z = -depth / 2;
+      backGable.rotation.y = Math.PI;
+      group.add(backGable);
+    }
+
+    // Structural frames (if enabled)
+    if (config.visualization.frames) {
+      const frameSpacing = config.structure.frameSpacing || 6;
+      const frameCount = Math.floor(depth / frameSpacing) + 1;
+      
+      for (let i = 0; i < frameCount; i++) {
+        const frameZ = -depth / 2 + (i * frameSpacing);
+        
+        // Vertical columns
+        const columnGeometry = new THREE.BoxGeometry(0.2, height, 0.2);
+        const frameMaterial = new THREE.MeshLambertMaterial({ color: '#2d3748' });
+        
+        // Left column
+        const leftColumn = new THREE.Mesh(columnGeometry, frameMaterial);
+        leftColumn.position.set(-width / 2, height / 2 + baseHeight, frameZ);
+        group.add(leftColumn);
+        
+        // Right column  
+        const rightColumn = new THREE.Mesh(columnGeometry, frameMaterial);
+        rightColumn.position.set(width / 2, height / 2 + baseHeight, frameZ);
+        group.add(rightColumn);
+        
+        // Horizontal beam
+        const beamGeometry = new THREE.BoxGeometry(width, 0.3, 0.2);
+        const beam = new THREE.Mesh(beamGeometry, frameMaterial);
+        beam.position.set(0, height + baseHeight, frameZ);
+        group.add(beam);
+      }
+    }
     if (config.openings.door.enabled) {
       const doorGeometry = new THREE.PlaneGeometry(
         config.openings.door.width,
