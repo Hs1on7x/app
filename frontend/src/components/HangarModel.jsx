@@ -110,8 +110,8 @@ export const HangarModel = ({ config }) => {
       }
     }
 
-    // Roof structure - Duo Pitch
-    if (config.roof.type === 'duo-pitch') {
+    // Roof structure - Duo Pitch (only if mainParts enabled)
+    if (config.visualization.mainParts && config.roof.type === 'duo-pitch') {
       const roofPitchRad = (config.roof.pitch * Math.PI) / 180;
       const ridgeHeight = config.roof.ridgeHeight || 2.5;
       const overhang = config.roof.overhang || 0.5;
@@ -168,10 +168,20 @@ export const HangarModel = ({ config }) => {
       roofGeometry.setAttribute('position', new THREE.Float32BufferAttribute(roofVertices, 3));
       roofGeometry.computeVertexNormals();
       
-      const roofMaterial = new THREE.MeshLambertMaterial({ 
-        color: config.roof.color,
-        side: THREE.DoubleSide 
-      });
+      let roofMaterial;
+      if (config.visualization.faces) {
+        roofMaterial = new THREE.MeshLambertMaterial({ 
+          color: config.roof.color,
+          side: THREE.DoubleSide 
+        });
+      } else {
+        roofMaterial = new THREE.MeshBasicMaterial({ 
+          color: config.roof.color,
+          wireframe: config.visualization.edges,
+          side: THREE.DoubleSide 
+        });
+      }
+      
       const roof = new THREE.Mesh(roofGeometry, roofMaterial);
       roof.castShadow = true;
       roof.receiveShadow = true;
@@ -185,7 +195,7 @@ export const HangarModel = ({ config }) => {
       ridge.castShadow = true;
       group.add(ridge);
       
-    } else if (config.roof.type === 'flat') {
+    } else if (config.visualization.mainParts && config.roof.type === 'flat') {
       // Flat roof
       const roofGeometry = new THREE.BoxGeometry(width, 0.2, depth);
       const roofMaterial = new THREE.MeshLambertMaterial({ color: '#4a5568' });
