@@ -8,13 +8,15 @@ export const mockHangarConfig = {
     edges: true,
     faces: true,
     mainParts: true,
+    buttons: false,
     dimensions: false,
     panels: true,
     solidWalls: true,
     openings: true,
-    frames: false,
-    purlins: false,
-    girts: false,
+    frames: true,
+    bracing: true,
+    purlins: true,
+    girts: true,
     flashing: false,
     accessories: false,
     basePlate: true,
@@ -36,6 +38,18 @@ export const mockHangarConfig = {
     overhang: 0.5, // meters
     gutterType: 'box',
     ridgeHeight: 2.5 // additional height at ridge
+  },
+  structure: {
+    colors: {
+      basePlate: '#9ca3af', // RAL 7035 equivalent
+      primaryStructure: '#1e40af', // RAL 5012 equivalent (blue)
+      secondaryStructure: '#6b7280', // RAL 5007 equivalent (gray)
+      otherFrames: '#1e40af', // RAL 5012
+      bracing: '#dc2626' // RAL 3003 (red)
+    },
+    frameSpacing: 6,
+    foundationType: 'concrete',
+    frameType: 'rigid'
   },
   openings: {
     door: {
