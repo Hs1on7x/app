@@ -115,7 +115,95 @@ export const RightSidebar = ({ config, onConfigChange }) => {
           </div>
         </Card>
 
-        {/* Panel Configuration */}
+        {/* Roof Configuration */}
+        <Card className="m-4 p-4 bg-gray-700 border-gray-600">
+          <h4 className="font-medium text-sm mb-4">Roof</h4>
+          
+          <div className="space-y-4">
+            <div>
+              <Label className="text-xs text-gray-400">Roof type</Label>
+              <select 
+                className="w-full p-2 mt-1 bg-gray-600 border border-gray-500 rounded text-sm text-white"
+                value={config.roof.type}
+                onChange={(e) => onConfigChange({
+                  ...config,
+                  roof: { ...config.roof, type: e.target.value }
+                })}
+              >
+                <option value="duo-pitch">Duo pitch</option>
+                <option value="mono-pitch">Mono pitch</option>
+                <option value="flat">Flat</option>
+              </select>
+            </div>
+            
+            {config.roof.type !== 'flat' && (
+              <div>
+                <Label className="text-xs text-gray-400">Pitch (degrees)</Label>
+                <Slider
+                  value={[config.roof.pitch]}
+                  onValueChange={(value) => onConfigChange({
+                    ...config,
+                    roof: { ...config.roof, pitch: value[0] }
+                  })}
+                  min={5}
+                  max={45}
+                  step={1}
+                  className="mt-2"
+                />
+                <span className="text-xs text-gray-400">{config.roof.pitch}°</span>
+              </div>
+            )}
+            
+            <div>
+              <Label className="text-xs text-gray-400">Ridge Height (m)</Label>
+              <Slider
+                value={[config.roof.ridgeHeight]}
+                onValueChange={(value) => onConfigChange({
+                  ...config,
+                  roof: { ...config.roof, ridgeHeight: value[0] }
+                })}
+                min={1}
+                max={5}
+                step={0.1}
+                className="mt-2"
+              />
+              <span className="text-xs text-gray-400">{config.roof.ridgeHeight}m</span>
+            </div>
+            
+            <div>
+              <Label className="text-xs text-gray-400">Overhang (m)</Label>
+              <Slider
+                value={[config.roof.overhang]}
+                onValueChange={(value) => onConfigChange({
+                  ...config,
+                  roof: { ...config.roof, overhang: value[0] }
+                })}
+                min={0}
+                max={2}
+                step={0.1}
+                className="mt-2"
+              />
+              <span className="text-xs text-gray-400">{config.roof.overhang}m</span>
+            </div>
+            
+            <div>
+              <Label className="text-xs text-gray-400">Roof Color</Label>
+              <div className="grid grid-cols-4 gap-2 mt-2">
+                {['#4a5568', '#2d3748', '#1a202c', '#8b5cf6'].map((color) => (
+                  <button
+                    key={color}
+                    className="w-8 h-8 rounded border-2 border-gray-500"
+                    style={{ backgroundColor: color }}
+                    onClick={() => onConfigChange({
+                      ...config,
+                      roof: { ...config.roof, color }
+                    })}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
         <Card className="m-4 p-4 bg-gray-700 border-gray-600">
           <h4 className="font-medium text-sm mb-4">Panels</h4>
           
