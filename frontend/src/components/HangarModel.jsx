@@ -139,50 +139,55 @@ export const HangarModel = ({ config }) => {
       const bracingMaterial = createMaterial(config.structure.colors.bracing, true);
       const frameCount = Math.floor(depth / frameSpacing) + 1;
       
+    // Enhanced Bracing System - 5 horizontal braces between each frame (only if bracing enabled)
+    if (config.visualization.bracing) {
+      const bracingMaterial = createMaterial(config.structure.colors.bracing, true);
+      const frameCount = Math.floor(depth / frameSpacing) + 1;
+      
       for (let i = 0; i < frameCount - 1; i++) {
         const frameZ1 = -depth / 2 + (i * frameSpacing);
         const frameZ2 = -depth / 2 + ((i + 1) * frameSpacing);
-        const bracingZ = (frameZ1 + frameZ2) / 2;
         
-        // Left side X-bracing
-        const leftBracingLength = Math.sqrt(frameSpacing ** 2 + height ** 2);
-        const leftBracingAngle = Math.atan(height / frameSpacing);
+        // Create 5 horizontal bracing elements between each pair of frames
+        for (let braceLevel = 1; braceLevel <= 5; braceLevel++) {
+          const braceY = baseHeight + (braceLevel * height / 6); // Distribute 5 braces evenly in height
+          
+          // Left side horizontal bracing
+          const leftBraceGeometry = new THREE.BoxGeometry(0.15, 0.15, frameSpacing);
+          const leftBrace = new THREE.Mesh(leftBraceGeometry, bracingMaterial);
+          leftBrace.position.set(-width / 2, braceY, (frameZ1 + frameZ2) / 2);
+          group.add(leftBrace);
+          
+          // Right side horizontal bracing
+          const rightBraceGeometry = new THREE.BoxGeometry(0.15, 0.15, frameSpacing);
+          const rightBrace = new THREE.Mesh(rightBraceGeometry, bracingMaterial);
+          rightBrace.position.set(width / 2, braceY, (frameZ1 + frameZ2) / 2);
+          group.add(rightBrace);
+        }
         
-        // Left diagonal 1 (bottom to top)
-        const leftBrace1 = new THREE.Mesh(
-          new THREE.BoxGeometry(leftBracingLength, 0.15, 0.15),
-          bracingMaterial
-        );
-        leftBrace1.position.set(-width / 2, height / 2 + baseHeight, bracingZ);
-        leftBrace1.rotation.x = leftBracingAngle;
-        group.add(leftBrace1);
-        
-        // Left diagonal 2 (top to bottom)
-        const leftBrace2 = new THREE.Mesh(
-          new THREE.BoxGeometry(leftBracingLength, 0.15, 0.15),
-          bracingMaterial
-        );
-        leftBrace2.position.set(-width / 2, height / 2 + baseHeight, bracingZ);
-        leftBrace2.rotation.x = -leftBracingAngle;
-        group.add(leftBrace2);
-        
-        // Right side X-bracing
-        const rightBrace1 = new THREE.Mesh(
-          new THREE.BoxGeometry(leftBracingLength, 0.15, 0.15),
-          bracingMaterial
-        );
-        rightBrace1.position.set(width / 2, height / 2 + baseHeight, bracingZ);
-        rightBrace1.rotation.x = leftBracingAngle;
-        group.add(rightBrace1);
-        
-        const rightBrace2 = new THREE.Mesh(
-          new THREE.BoxGeometry(leftBracingLength, 0.15, 0.15),
-          bracingMaterial
-        );
-        rightBrace2.position.set(width / 2, height / 2 + baseHeight, bracingZ);
-        rightBrace2.rotation.x = -leftBracingAngle;
-        group.add(rightBrace2);
+        // Add vertical connecting elements between the horizontal braces for structural appearance
+        for (let side = 0; side < 2; side++) {
+          const sideX = side === 0 ? -width / 2 : width / 2;
+          
+          // Create vertical connectors between horizontal braces
+          for (let connector = 1; connector <= 4; connector++) {
+            const connectorY1 = baseHeight + (connector * height / 6);
+            const connectorY2 = baseHeight + ((connector + 1) * height / 6);
+            const connectorHeight = connectorY2 - connectorY1;
+            
+            const verticalConnectorGeometry = new THREE.BoxGeometry(0.1, connectorHeight, 0.1);
+            const verticalConnector = new THREE.Mesh(verticalConnectorGeometry, bracingMaterial);
+            verticalConnector.position.set(sideX, (connectorY1 + connectorY2) / 2, frameZ1);
+            group.add(verticalConnector);
+            
+            // Add connector at the second frame position too
+            const verticalConnector2 = new THREE.Mesh(verticalConnectorGeometry, bracingMaterial);
+            verticalConnector2.position.set(sideX, (connectorY1 + connectorY2) / 2, frameZ2);
+            group.add(verticalConnector2);
+          }
+        }
       }
+    }
     }
 
     // Girts (Horizontal wall supports) - only if girts enabled  
