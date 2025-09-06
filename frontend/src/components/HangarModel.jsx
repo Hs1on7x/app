@@ -206,8 +206,8 @@ export const HangarModel = ({ config }) => {
       }
     }
 
-    // Purlins (Horizontal roof supports aligned with roof slope) - only if purlins enabled
-    if (config.visualization.purlins && config.roof.type === 'duo-pitch') {
+    // Purlins (Horizontal roof supports aligned with roof slope) - controlled by mainParts
+    if (config.visualization.mainParts && config.roof.type === 'duo-pitch') {
       const purlinMaterial = createMaterial(config.structure.colors.secondaryStructure, true);
       const purlinSpacing = 3; // Every 3 meters along roof slope
       const roofSlope = ridgeHeight / (width / 2); // Calculate roof slope
