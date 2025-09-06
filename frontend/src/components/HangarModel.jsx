@@ -385,7 +385,7 @@ export const HangarModel = ({ config }) => {
       group.add(backGable);
     }
 
-    // Complete Wall Panels - Cover entire structure on sides (only if panels enabled)
+    // Complete Wall Panels - Cover frames and girts at frame height (only if panels enabled)
     if (config.visualization.panels || config.visualization.solidWalls) {
       let wallPanelMaterial;
       if (config.visualization.faces) {
@@ -401,23 +401,39 @@ export const HangarModel = ({ config }) => {
         });
       }
 
-      // Left side wall panel - covers entire structure from ground to roof
-      const leftWallGeometry = new THREE.BoxGeometry(0.05, height + ridgeHeight, depth);
+      // Left side wall panel - covers frames and girts at frame height only
+      const leftWallGeometry = new THREE.BoxGeometry(0.08, height, depth);
       const leftWallPanel = new THREE.Mesh(leftWallGeometry, wallPanelMaterial);
-      leftWallPanel.position.set(-width / 2 - 0.1, (height + ridgeHeight) / 2 + baseHeight, 0);
+      leftWallPanel.position.set(-width / 2 - 0.04, height / 2 + baseHeight, 0);
       leftWallPanel.castShadow = true;
       leftWallPanel.receiveShadow = true;
       group.add(leftWallPanel);
 
-      // Right side wall panel - covers entire structure from ground to roof
-      const rightWallGeometry = new THREE.BoxGeometry(0.05, height + ridgeHeight, depth);
+      // Right side wall panel - covers frames and girts at frame height only
+      const rightWallGeometry = new THREE.BoxGeometry(0.08, height, depth);
       const rightWallPanel = new THREE.Mesh(rightWallGeometry, wallPanelMaterial);
-      rightWallPanel.position.set(width / 2 + 0.1, (height + ridgeHeight) / 2 + baseHeight, 0);
+      rightWallPanel.position.set(width / 2 + 0.04, height / 2 + baseHeight, 0);
       rightWallPanel.castShadow = true;
       rightWallPanel.receiveShadow = true;
       group.add(rightWallPanel);
 
-      // Add vertical corrugation lines to simulate panel ribs
+      // Front wall panel - completely covers front with no door opening
+      const frontWallGeometry = new THREE.BoxGeometry(width, height, 0.08);
+      const frontWallPanel = new THREE.Mesh(frontWallGeometry, wallPanelMaterial);
+      frontWallPanel.position.set(0, height / 2 + baseHeight, depth / 2 + 0.04);
+      frontWallPanel.castShadow = true;
+      frontWallPanel.receiveShadow = true;
+      group.add(frontWallPanel);
+
+      // Back wall panel - completely covers back
+      const backWallGeometry = new THREE.BoxGeometry(width, height, 0.08);
+      const backWallPanel = new THREE.Mesh(backWallGeometry, wallPanelMaterial);
+      backWallPanel.position.set(0, height / 2 + baseHeight, -depth / 2 - 0.04);
+      backWallPanel.castShadow = true;
+      backWallPanel.receiveShadow = true;
+      group.add(backWallPanel);
+
+      // Add vertical corrugation lines to simulate panel ribs on sides
       const corrugationSpacing = 1.2; // Every 1.2 meters
       const corrugationCount = Math.floor(depth / corrugationSpacing);
       
@@ -425,16 +441,35 @@ export const HangarModel = ({ config }) => {
         const corrugationZ = -depth / 2 + (i * corrugationSpacing);
         
         // Left side corrugation lines
-        const leftCorrugationGeometry = new THREE.BoxGeometry(0.02, height + ridgeHeight, 0.02);
+        const leftCorrugationGeometry = new THREE.BoxGeometry(0.02, height, 0.02);
         const leftCorrugation = new THREE.Mesh(leftCorrugationGeometry, wallPanelMaterial);
-        leftCorrugation.position.set(-width / 2 - 0.12, (height + ridgeHeight) / 2 + baseHeight, corrugationZ);
+        leftCorrugation.position.set(-width / 2 - 0.09, height / 2 + baseHeight, corrugationZ);
         group.add(leftCorrugation);
         
         // Right side corrugation lines  
-        const rightCorrugationGeometry = new THREE.BoxGeometry(0.02, height + ridgeHeight, 0.02);
+        const rightCorrugationGeometry = new THREE.BoxGeometry(0.02, height, 0.02);
         const rightCorrugation = new THREE.Mesh(rightCorrugationGeometry, wallPanelMaterial);
-        rightCorrugation.position.set(width / 2 + 0.12, (height + ridgeHeight) / 2 + baseHeight, corrugationZ);
+        rightCorrugation.position.set(width / 2 + 0.09, height / 2 + baseHeight, corrugationZ);
         group.add(rightCorrugation);
+      }
+
+      // Add horizontal corrugation lines on front and back walls
+      const horizontalCorrugationCount = Math.floor(width / corrugationSpacing);
+      
+      for (let i = 0; i <= horizontalCorrugationCount; i++) {
+        const corrugationX = -width / 2 + (i * corrugationSpacing);
+        
+        // Front wall corrugation lines
+        const frontCorrugationGeometry = new THREE.BoxGeometry(0.02, height, 0.02);
+        const frontCorrugation = new THREE.Mesh(frontCorrugationGeometry, wallPanelMaterial);
+        frontCorrugation.position.set(corrugationX, height / 2 + baseHeight, depth / 2 + 0.09);
+        group.add(frontCorrugation);
+        
+        // Back wall corrugation lines  
+        const backCorrugationGeometry = new THREE.BoxGeometry(0.02, height, 0.02);
+        const backCorrugation = new THREE.Mesh(backCorrugationGeometry, wallPanelMaterial);
+        backCorrugation.position.set(corrugationX, height / 2 + baseHeight, -depth / 2 - 0.09);
+        group.add(backCorrugation);
       }
     }
 
