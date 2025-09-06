@@ -31,13 +31,12 @@ export const mockHangarConfig = {
   },
   roof: {
     type: 'duo-pitch', // 'flat', 'duo-pitch', 'mono-pitch'
-    pitch: 15, // degrees (converted from 1.00 x/12)
-    slope: 1.00, // x/12 format
+    pitch: 20, // degrees (moderate slope within 10-30° range as specified)
     material: 'metal',
     color: '#4a5568',
     overhang: 0.5, // meters
     gutterType: 'box',
-    ridgeHeight: 2.5 // additional height at ridge
+    ridgeHeight: 3.0 // additional height at ridge for proper triangle proportion
   },
   structure: {
     colors: {
