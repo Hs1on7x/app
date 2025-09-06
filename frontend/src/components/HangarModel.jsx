@@ -90,29 +90,42 @@ export const HangarModel = ({ config }) => {
         rightColumn.castShadow = true;
         group.add(rightColumn);
         
-        // Triangular roof frame (Duo Pitch)
+        // Triangular roof frame (Duo Pitch) - properly oriented
         if (config.roof.type === 'duo-pitch') {
-          // Left rafter
           const rafterLength = Math.sqrt((width / 2) ** 2 + ridgeHeight ** 2);
           const rafterAngle = Math.atan(ridgeHeight / (width / 2));
           
-          const leftRafterGeometry = new THREE.BoxGeometry(rafterLength, 0.4, 0.4);
+          // Left rafter - properly positioned and oriented
+          const leftRafterGeometry = new THREE.BoxGeometry(0.4, 0.4, rafterLength);
           const leftRafter = new THREE.Mesh(leftRafterGeometry, primaryMaterial);
-          leftRafter.position.set(-width / 4, height + baseHeight + ridgeHeight / 2, frameZ);
-          leftRafter.rotation.z = -rafterAngle;
+          
+          // Position the left rafter correctly
+          leftRafter.position.set(
+            -width / 4, 
+            height + baseHeight + ridgeHeight / 2, 
+            frameZ
+          );
+          leftRafter.rotation.x = -rafterAngle; // Rotate around X-axis to align with roof slope
           group.add(leftRafter);
           
-          // Right rafter
-          const rightRafter = new THREE.Mesh(leftRafterGeometry, primaryMaterial);
-          rightRafter.position.set(width / 4, height + baseHeight + ridgeHeight / 2, frameZ);
-          rightRafter.rotation.z = rafterAngle;
+          // Right rafter - properly positioned and oriented
+          const rightRafterGeometry = new THREE.BoxGeometry(0.4, 0.4, rafterLength);
+          const rightRafter = new THREE.Mesh(rightRafterGeometry, primaryMaterial);
+          
+          // Position the right rafter correctly
+          rightRafter.position.set(
+            width / 4, 
+            height + baseHeight + ridgeHeight / 2, 
+            frameZ
+          );
+          rightRafter.rotation.x = rafterAngle; // Rotate around X-axis to align with roof slope
           group.add(rightRafter);
           
-          // Ridge beam
-          const ridgeGeometry = new THREE.BoxGeometry(0.4, 0.4, 0.4);
-          const ridge = new THREE.Mesh(ridgeGeometry, primaryMaterial);
-          ridge.position.set(0, height + baseHeight + ridgeHeight, frameZ);
-          group.add(ridge);
+          // Ridge beam at the peak
+          const ridgeBeamGeometry = new THREE.BoxGeometry(0.4, 0.4, 0.4);
+          const ridgeBeam = new THREE.Mesh(ridgeBeamGeometry, primaryMaterial);
+          ridgeBeam.position.set(0, height + baseHeight + ridgeHeight, frameZ);
+          group.add(ridgeBeam);
         }
         
         // Horizontal tie beam
