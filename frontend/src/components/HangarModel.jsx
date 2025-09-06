@@ -195,24 +195,50 @@ export const HangarModel = ({ config }) => {
       }
     }
 
-    // Purlins (Horizontal roof supports) - only if purlins enabled
+    // Purlins (Horizontal roof supports aligned with roof slope) - only if purlins enabled
     if (config.visualization.purlins && config.roof.type === 'duo-pitch') {
       const purlinMaterial = createMaterial(config.structure.colors.secondaryStructure, true);
-      const purlinCount = Math.floor(width / 4); // Every 4 meters
+      const purlinSpacing = 3; // Every 3 meters along roof slope
+      const roofSlope = ridgeHeight / (width / 2); // Calculate roof slope
+      const rafterLength = Math.sqrt((width / 2) ** 2 + ridgeHeight ** 2);
+      const rafterAngle = Math.atan(ridgeHeight / (width / 2));
       
-      for (let i = 0; i <= purlinCount; i++) {
-        const purlinX = -width / 2 + (i * (width / purlinCount));
+      // Calculate number of purlins per side based on rafter length
+      const purlinsPerSide = Math.floor(rafterLength / purlinSpacing);
+      
+      // Left side purlins (aligned with left roof slope)
+      for (let i = 1; i <= purlinsPerSide; i++) {
+        const distanceAlongRafter = (i * rafterLength) / (purlinsPerSide + 1);
         
-        // Calculate purlin Y position based on roof slope
-        const distanceFromCenter = Math.abs(purlinX);
-        const slopeRatio = ridgeHeight / (width / 2);
-        const purlinY = height + baseHeight + ridgeHeight - (distanceFromCenter * slopeRatio);
+        // Calculate position along the sloped roof
+        const purlinX = -width / 2 + (distanceAlongRafter * Math.cos(rafterAngle));
+        const purlinY = height + baseHeight + (distanceAlongRafter * Math.sin(rafterAngle));
         
         const purlinGeometry = new THREE.BoxGeometry(0.2, 0.2, depth);
-        const purlin = new THREE.Mesh(purlinGeometry, purlinMaterial);
-        purlin.position.set(purlinX, purlinY, 0);
-        group.add(purlin);
+        const leftPurlin = new THREE.Mesh(purlinGeometry, purlinMaterial);
+        leftPurlin.position.set(purlinX, purlinY, 0);
+        group.add(leftPurlin);
       }
+      
+      // Right side purlins (aligned with right roof slope)
+      for (let i = 1; i <= purlinsPerSide; i++) {
+        const distanceAlongRafter = (i * rafterLength) / (purlinsPerSide + 1);
+        
+        // Calculate position along the sloped roof
+        const purlinX = width / 2 - (distanceAlongRafter * Math.cos(rafterAngle));
+        const purlinY = height + baseHeight + (distanceAlongRafter * Math.sin(rafterAngle));
+        
+        const purlinGeometry = new THREE.BoxGeometry(0.2, 0.2, depth);
+        const rightPurlin = new THREE.Mesh(purlinGeometry, purlinMaterial);
+        rightPurlin.position.set(purlinX, purlinY, 0);
+        group.add(rightPurlin);
+      }
+      
+      // Ridge purlin at the peak
+      const ridgePurlinGeometry = new THREE.BoxGeometry(0.2, 0.2, depth);
+      const ridgePurlin = new THREE.Mesh(ridgePurlinGeometry, purlinMaterial);
+      ridgePurlin.position.set(0, height + baseHeight + ridgeHeight, 0);
+      group.add(ridgePurlin);
     }
 
     // Triangular Gable Roof (Duo Pitch) - matching reference image
