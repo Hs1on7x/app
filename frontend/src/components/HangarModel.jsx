@@ -492,25 +492,6 @@ export const HangarModel = ({ config }) => {
         group.add(backGirt);
       }
     }
-    // Add door if configured (only if openings enabled)
-    if (config.visualization.openings && config.openings.door.enabled) {
-      const doorGeometry = new THREE.PlaneGeometry(
-        config.openings.door.width,
-        config.openings.door.height
-      );
-      const doorMaterial = new THREE.MeshLambertMaterial({ 
-        color: '#8b5cf6',
-        transparent: true,
-        opacity: 0.7
-      });
-      const door = new THREE.Mesh(doorGeometry, doorMaterial);
-      door.position.set(
-        config.openings.door.x,
-        config.openings.door.height / 2 + baseHeight,
-        depth / 2 + 0.02
-      );
-      group.add(door);
-    }
 
     // Add dimensions display (only if dimensions enabled)
     if (config.visualization.dimensions) {
