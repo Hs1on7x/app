@@ -90,35 +90,35 @@ export const HangarModel = ({ config }) => {
         rightColumn.castShadow = true;
         group.add(rightColumn);
         
-        // Triangular roof frame (Duo Pitch) - properly oriented
+        // Triangular roof frame (Duo Pitch) - properly oriented to match ceiling
         if (config.roof.type === 'duo-pitch') {
           const rafterLength = Math.sqrt((width / 2) ** 2 + ridgeHeight ** 2);
           const rafterAngle = Math.atan(ridgeHeight / (width / 2));
           
-          // Left rafter - properly positioned and oriented
-          const leftRafterGeometry = new THREE.BoxGeometry(0.4, 0.4, rafterLength);
+          // Left rafter - sloping from ridge to left eave
+          const leftRafterGeometry = new THREE.BoxGeometry(rafterLength, 0.4, 0.4);
           const leftRafter = new THREE.Mesh(leftRafterGeometry, primaryMaterial);
           
-          // Position the left rafter correctly
+          // Position and rotate the left rafter correctly
           leftRafter.position.set(
             -width / 4, 
             height + baseHeight + ridgeHeight / 2, 
             frameZ
           );
-          leftRafter.rotation.x = -rafterAngle; // Rotate around X-axis to align with roof slope
+          leftRafter.rotation.z = -rafterAngle; // Rotate to match roof slope
           group.add(leftRafter);
           
-          // Right rafter - properly positioned and oriented
-          const rightRafterGeometry = new THREE.BoxGeometry(0.4, 0.4, rafterLength);
+          // Right rafter - sloping from ridge to right eave
+          const rightRafterGeometry = new THREE.BoxGeometry(rafterLength, 0.4, 0.4);
           const rightRafter = new THREE.Mesh(rightRafterGeometry, primaryMaterial);
           
-          // Position the right rafter correctly
+          // Position and rotate the right rafter correctly
           rightRafter.position.set(
             width / 4, 
             height + baseHeight + ridgeHeight / 2, 
             frameZ
           );
-          rightRafter.rotation.x = rafterAngle; // Rotate around X-axis to align with roof slope
+          rightRafter.rotation.z = rafterAngle; // Rotate to match roof slope
           group.add(rightRafter);
           
           // Ridge beam at the peak
