@@ -69,8 +69,8 @@ export const HangarModel = ({ config }) => {
       }
     }
 
-    // Triangular Steel Frames (Primary Structure) - only if frames enabled
-    if (config.visualization.frames) {
+    // Triangular Steel Frames (Primary Structure) - controlled by mainParts
+    if (config.visualization.mainParts) {
       const frameCount = Math.floor(depth / frameSpacing) + 1;
       const primaryMaterial = createMaterial(config.structure.colors.primaryStructure, true);
       
@@ -90,35 +90,33 @@ export const HangarModel = ({ config }) => {
         rightColumn.castShadow = true;
         group.add(rightColumn);
         
-        // Triangular roof frame (Duo Pitch) - properly oriented to match ceiling
+        // Triangular roof frame (Duo Pitch) - properly oriented to align with Main parts roof
         if (config.roof.type === 'duo-pitch') {
           const rafterLength = Math.sqrt((width / 2) ** 2 + ridgeHeight ** 2);
           const rafterAngle = Math.atan(ridgeHeight / (width / 2));
           
-          // Left rafter - sloping from ridge to left eave
+          // Left rafter - correctly positioned from eave to ridge
           const leftRafterGeometry = new THREE.BoxGeometry(rafterLength, 0.4, 0.4);
           const leftRafter = new THREE.Mesh(leftRafterGeometry, primaryMaterial);
           
-          // Position and rotate the left rafter correctly
-          leftRafter.position.set(
-            -width / 4, 
-            height + baseHeight + ridgeHeight / 2, 
-            frameZ
-          );
-          leftRafter.rotation.z = -rafterAngle; // Rotate to match roof slope
+          // Position from left eave to ridge peak
+          const leftRafterCenterX = -width / 4;
+          const leftRafterCenterY = height + baseHeight + (ridgeHeight / 2);
+          
+          leftRafter.position.set(leftRafterCenterX, leftRafterCenterY, frameZ);
+          leftRafter.rotation.z = rafterAngle; // Positive angle for left side
           group.add(leftRafter);
           
-          // Right rafter - sloping from ridge to right eave
+          // Right rafter - correctly positioned from eave to ridge  
           const rightRafterGeometry = new THREE.BoxGeometry(rafterLength, 0.4, 0.4);
           const rightRafter = new THREE.Mesh(rightRafterGeometry, primaryMaterial);
           
-          // Position and rotate the right rafter correctly
-          rightRafter.position.set(
-            width / 4, 
-            height + baseHeight + ridgeHeight / 2, 
-            frameZ
-          );
-          rightRafter.rotation.z = rafterAngle; // Rotate to match roof slope
+          // Position from right eave to ridge peak
+          const rightRafterCenterX = width / 4;
+          const rightRafterCenterY = height + baseHeight + (ridgeHeight / 2);
+          
+          rightRafter.position.set(rightRafterCenterX, rightRafterCenterY, frameZ);
+          rightRafter.rotation.z = -rafterAngle; // Negative angle for right side
           group.add(rightRafter);
           
           // Ridge beam at the peak
