@@ -60,11 +60,6 @@ export const mockHangarConfig = {
       y: 0
     },
     windows: []
-  },
-  structure: {
-    frameSpacing: 6,
-    foundationType: 'concrete',
-    frameType: 'rigid'
   }
 };
 
